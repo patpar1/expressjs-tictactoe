@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1= title
+  table#board
+    tr
+      td#s0.square(onclick="squareClick(0)") #{game_board[0]}
+      td#s1.square(onclick="squareClick(1)") #{game_board[1]}
+      td#s2.square(onclick="squareClick(2)") #{game_board[2]}
+    tr
+      td#s3.square(onclick="squareClick(3)") #{game_board[3]}
+      td#s4.square(onclick="squareClick(4)") #{game_board[4]}
+      td#s5.square(onclick="squareClick(5)") #{game_board[5]}
+    tr
+      td#s6.square(onclick="squareClick(6)") #{game_board[6]}
+      td#s7.square(onclick="squareClick(7)") #{game_board[7]}
+      td#s8.square(onclick="squareClick(8)") #{game_board[8]}
+  form(method='POST' action='/clear')
+    button.btn.btn-primary(type='submit') Clear the board

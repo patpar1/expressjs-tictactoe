@@ -23,7 +23,26 @@ exports.getGame = function(req, res, next) {
     if (err) {
       return next(err);
     }
+    if (!game) {
+      res.redirect("/create");
+    }
     res.send(game);
+  });
+};
+
+exports.createGame = function(req, res, next) {
+  var game = new Game({
+    board: new Array(9).fill(""),
+    playerTurn: "x",
+    finished: false
+  });
+
+  game.save(function(err) {
+    if (err) {
+      return next(err);
+    }
+    // Successful - redirect to new book record.
+    res.redirect("/game");
   });
 };
 

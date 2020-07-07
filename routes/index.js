@@ -10,6 +10,8 @@ router.get("/game", game_controller.getGame);
 
 router.post("/update", game_controller.updateBoard);
 
+router.post("/create", game_controller.createBoard);
+
 router.post("/clear", game_controller.clearBoard);
 
 module.exports = router;

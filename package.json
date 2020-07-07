@@ -4,7 +4,7 @@
   "description": "An Express-based application skeleton",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js localhost 8080"
+    "start": "node ./bin/www.js"
   },
   "dependencies": {
     "bluebird": "3.7.2",
@@ -12,6 +12,7 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "http-errors": "1.8.0",
     "mongoose": "5.9.22",
     "morgan": "~1.9.1",
     "pug": "3.0.0"
@@ -19,8 +20,5 @@
   "devDependencies": {
     "nodemon": "1.18.4"
   },
-  "keywords": [
-    "expressjs",
-    "express"
-  ]
+  "keywords": ["expressjs", "express"]
 }

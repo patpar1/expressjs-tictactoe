@@ -1,3 +1,4 @@
+var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
@@ -5,9 +6,13 @@ var logger = require("morgan");
 var Promise = require("bluebird");
 var bodyParser = require("body-parser");
 
-Object.engine("html", require("ejs").renderFile);
+// Routers
+var indexRouter = require("./routes/index");
 
 var app = express();
+
+// Set up mongoose connection
+var mongoose = require("mongoose");
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
   ip = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0",
@@ -51,6 +56,7 @@ if (mongoURL == null) {
   }
 }
 
+// Connecting to DB
 var db = null,
   dbDetails = new Object();
 
@@ -75,6 +81,12 @@ var initDb = function(callback) {
   });
 };
 
+mongoose.Promise = Promise;
+
+// View engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
+
 app.use(logger("combined"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -82,48 +94,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-var indexRouter = require("./routes/index");
-
+// Use the route
 app.use("/", indexRouter);
-
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
-
-app.get("/", function(req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err) {});
-  }
-  if (db) {
-    var col = db.collection("counts");
-    // Create a document with request IP and current time of request
-    col.insert({ ip: req.ip, date: Date.now() });
-    col.count(function(err, count) {
-      if (err) {
-        console.log("Error running count. Message:\n" + err);
-      }
-      res.render("index.html", { pageCountMessage: count, dbInfo: dbDetails });
-    });
-  } else {
-    res.render("index.html", { pageCountMessage: null });
-  }
-});
-
-app.get("/pagecount", function(req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err) {});
-  }
-  if (db) {
-    db.collection("counts").count(function(err, count) {
-      res.send("{ pageCount: " + count + "}");
-    });
-  } else {
-    res.send("{ pageCount: -1 }");
-  }
-});
 
 // error handling
 app.use(function(err, req, res, next) {

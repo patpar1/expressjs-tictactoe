@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node ./bin/www.js"
   },
+  "engine": {
+    "node": "*",
+    "npm": "*"
+  },
   "dependencies": {
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",

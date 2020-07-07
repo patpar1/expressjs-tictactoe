@@ -14,9 +14,7 @@ var app = express();
 // Set up mongoose connection
 var mongoose = require("mongoose");
 
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-  ip = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0",
-  mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+var mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
   mongoURLLabel = "";
 
 if (mongoURL == null) {
@@ -36,9 +34,9 @@ if (mongoURL == null) {
     mongoPassword = process.env.password;
     mongoUser = process.env.username;
     var mongoUriParts = process.env.uri && process.env.uri.split("//");
-    if (mongoUriParts.length === 2) {
+    if (mongoUriParts.length == 2) {
       mongoUriParts = mongoUriParts[1].split(":");
-      if (mongoUriParts && mongoUriParts.length === 2) {
+      if (mongoUriParts && mongoUriParts.length == 2) {
         mongoHost = mongoUriParts[0];
         mongoPort = mongoUriParts[1];
       }
@@ -56,32 +54,10 @@ if (mongoURL == null) {
   }
 }
 
-// Connecting to DB
-var db = null,
-  dbDetails = new Object();
-
-var initDb = function(callback) {
-  if (mongoURL == null) return;
-
-  var mongodb = require("mongodb");
-  if (mongodb == null) return;
-
-  mongodb.connect(mongoURL, function(err, conn) {
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    db = conn;
-    dbDetails.databaseName = db.databaseName;
-    dbDetails.url = mongoURLLabel;
-    dbDetails.type = "MongoDB";
-
-    console.log("Connected to MongoDB at: %s", mongoURL);
-  });
-};
-
+mongoose.connect(mongoURL);
 mongoose.Promise = Promise;
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 // View engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -97,17 +73,20 @@ app.use(express.static(path.join(__dirname, "public")));
 // Use the route
 app.use("/", indexRouter);
 
-// error handling
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
 app.use(function(err, req, res, next) {
-  console.error(err.stack);
-  res.status(500).send("Something bad happened!");
-});
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-initDb(function(err) {
-  console.log("Error connecting to Mongo. Message:\n" + err);
+  // render the error page
+  res.status(err.status || 500);
+  res.render("error");
 });
-
-app.listen(port, ip);
-console.log("Server running on http://%s:%s", ip, port);
 
 module.exports = app;

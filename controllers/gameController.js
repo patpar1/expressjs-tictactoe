@@ -24,25 +24,19 @@ exports.getGame = function(req, res, next) {
       return next(err);
     }
     if (!game) {
-      res.redirect("/create");
+      new Game({
+        board: new Array(9).fill(""),
+        playerTurn: "x",
+        finished: false
+      }).save(function(err) {
+        if (err) {
+          return next(err);
+        }
+      });
+      res.redirect("/game");
+    } else {
+      res.send(game);
     }
-    res.send(game);
-  });
-};
-
-exports.createGame = function(req, res, next) {
-  var game = new Game({
-    board: new Array(9).fill(""),
-    playerTurn: "x",
-    finished: false
-  });
-
-  game.save(function(err) {
-    if (err) {
-      return next(err);
-    }
-    // Successful - redirect to new book record.
-    res.redirect("/game");
   });
 };
 
